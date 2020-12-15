@@ -1,4 +1,6 @@
+using Core.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +25,9 @@ namespace ECommerce
 		{
 			services.AddControllers();
 			services.AddDbContext<StoreContext>(context => context.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
+			services.AddScoped<IProductRepository, ProductRepository>();
+			services.AddScoped<IProductBrandRepository, ProductBrandRepository>();
+			services.AddScoped<IProductTypeRepository, ProductTypeRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +54,7 @@ namespace ECommerce
 				});
 
 				endpoints.MapControllerRoute(
-					name: "getProducts",
+					name: "getEntities",
 					pattern: "api/{controller}/{action}/{id?}");
 			});
 				
