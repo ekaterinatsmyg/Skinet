@@ -1,6 +1,5 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,9 +10,9 @@ namespace ECommerce.Controllers
 	[ApiController]
 	public class ProductBrandsController : ControllerBase
 	{
-		private readonly IProductBrandRepository _productBrandRepository;
+		private readonly IGenericRepository<ProductBrand> _productBrandRepository;
 
-		public ProductBrandsController(IProductBrandRepository productBrandRepository)
+		public ProductBrandsController(IGenericRepository<ProductBrand> productBrandRepository)
 		{
 			_productBrandRepository = productBrandRepository;
 		}
@@ -21,7 +20,7 @@ namespace ECommerce.Controllers
 		[HttpGet]
 		public async Task<ActionResult<List<ProductBrand>>> GetBrands()
 		{
-			var brands = await _productBrandRepository.GetProductBrandsAsync();
+			var brands = await _productBrandRepository.ListAllAsync();
 			return Ok(brands);
 		}
 	}

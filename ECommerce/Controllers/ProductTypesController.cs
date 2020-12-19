@@ -1,10 +1,7 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ECommerce.Controllers
@@ -13,16 +10,16 @@ namespace ECommerce.Controllers
 	[ApiController]
 	public class ProductTypesController : ControllerBase
 	{
-		private readonly IProductTypeRepository _productTypeRepository;
+		private readonly IGenericRepository<ProductType> _productTypeRepository;
 
-		public ProductTypesController(IProductTypeRepository productTypeRepository)
+		public ProductTypesController(IGenericRepository<ProductType> productTypeRepository)
 		{
 			_productTypeRepository = productTypeRepository;
 		}
 
 		public async Task<ActionResult<List<ProductType>>> GetProductTypes()
 		{
-			var types = await _productTypeRepository.GetProductTypesAsync();
+			var types = await _productTypeRepository.ListAllAsync();
 			return Ok(types);
 		}
 	}

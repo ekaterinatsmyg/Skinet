@@ -1,4 +1,7 @@
+using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
+using ECommerce.Hepers;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -24,10 +27,14 @@ namespace ECommerce
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllers();
+
 			services.AddDbContext<StoreContext>(context => context.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
-			services.AddScoped<IProductRepository, ProductRepository>();
-			services.AddScoped<IProductBrandRepository, ProductBrandRepository>();
-			services.AddScoped<IProductTypeRepository, ProductTypeRepository>();
+
+			services.AddAutoMapper(typeof(MappingProfiles));
+			services.AddScoped<IGenericRepository<Product>, GenericRepository<Product>>();
+			services.AddScoped<IGenericRepository<ProductBrand>, GenericRepository<ProductBrand>>();
+			services.AddScoped<IGenericRepository<ProductType>, GenericRepository<ProductType>>();
+			
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +48,8 @@ namespace ECommerce
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
+
+			app.UseStaticFiles();
 
 			app.UseAuthentication();
 

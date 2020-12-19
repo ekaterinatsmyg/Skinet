@@ -1,8 +1,9 @@
-﻿using Core.Entities;
+﻿using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
-using Infrastructure.Data;
+using Core.Specifications;
+using ECommerce.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,24 +13,30 @@ namespace ECommerce.Controllers
 	[ApiController]
 	public class ProductsController : ControllerBase
 	{
-		private readonly IProductRepository _productRepository;
-		public ProductsController(IProductRepository productRepository)
+		private readonly IGenericRepository<Product> _productRepository;
+		private readonly IMapper _mapper;
+
+		public ProductsController(IGenericRepository<Product> productRepository, IMapper mapper)
 		{
 			_productRepository = productRepository;
+			_mapper = mapper;
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<List<Product>>> GetProducts()
+		public async Task<ActionResult<IReadOnlyList<ProductDTO>>> GetProducts()
 		{
-			var products = await _productRepository.GetProductsAsync();
-			return Ok(products);
+			var spec = new ProductsWithRelatedSpecification();
+			var products = await _productRepository.ListAsync(spec);
+			return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductDTO>>(products));
 		}
 
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Product>> GetProduct(int id)
+		public async Task<ActionResult<ProductDTO>> GetProduct(int id)
 		{
-			var product = await _productRepository.GetProductByIdAsync(id);
-			return Ok(product);
+			var spec = new ProductsWithRelatedSpecification(id);
+			var product = await _productRepository.GetEntityWithSpec(spec);
+			
+			return Ok(_mapper.Map<Product, ProductDTO>(product));
 		}
 	}
 }
