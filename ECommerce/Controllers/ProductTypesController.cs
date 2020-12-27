@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace ECommerce.Controllers
 {
 	[Route("api/types")]
-	[ApiController]
-	public class ProductTypesController : ControllerBase
+	public class ProductTypesController : BaseApiController
 	{
 		private readonly IGenericRepository<ProductType> _productTypeRepository;
 
@@ -17,6 +16,7 @@ namespace ECommerce.Controllers
 			_productTypeRepository = productTypeRepository;
 		}
 
+		[HttpGet]
 		public async Task<ActionResult<List<ProductType>>> GetProductTypes()
 		{
 			var types = await _productTypeRepository.ListAllAsync();
