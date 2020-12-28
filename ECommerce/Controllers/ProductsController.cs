@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Specifications;
 using ECommerce.DTOs;
 using ECommerce.Errors;
+using ECommerce.Hepers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -24,11 +25,26 @@ namespace ECommerce.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<IReadOnlyList<ProductDTO>>> GetProducts()
+		public async Task<ActionResult<Pagination<ProductDTO>>> GetProducts(
+			[FromQuery] ProductSpecificationParams productParams)
 		{
-			var spec = new ProductsWithRelatedSpecification();
+			var spec = new ProductsWithRelatedSpecification(productParams);
+
+			var countSpec = new ProductsWithFiltersForCountSpecification(productParams);
+
+			var totalItems = await _productRepository.CountAsync(countSpec);
+
 			var products = await _productRepository.ListAsync(spec);
-			return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductDTO>>(products));
+
+			var data = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDTO>>(products);
+
+			return Ok(new Pagination<ProductDTO>()
+			{
+				Count = totalItems,
+				Data = data,
+				PageIndex = productParams.PageIndex,
+				PageSize = productParams.PageSize,
+			});
 		}
 
 		[HttpGet("{id}")]
@@ -39,11 +55,11 @@ namespace ECommerce.Controllers
 			var spec = new ProductsWithRelatedSpecification(id);
 			var product = await _productRepository.GetEntityWithSpec(spec);
 
-			if(product == null)
+			if (product == null)
 			{
 				return NotFound(new ApiResponse((int)HttpStatusCode.NotFound));
 			}
-			
+
 			return Ok(_mapper.Map<Product, ProductDTO>(product));
 		}
 	}

@@ -1,10 +1,4 @@
 ﻿using Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Specifications
 {
@@ -14,12 +8,40 @@ namespace Core.Specifications
 		{
 			base.AddInclude(x => x.ProductBrand);
 			base.AddInclude(x => x.ProductType);
+			base.AddOrderBy(x => x.Name);
 		}
 
 		public ProductsWithRelatedSpecification(int id) : base(x => x.Id == id)
 		{
 			base.AddInclude(x => x.ProductBrand);
 			base.AddInclude(x => x.ProductType);
+		}
+
+		public ProductsWithRelatedSpecification(ProductSpecificationParams productParams)
+			: base(x =>
+				(string.IsNullOrEmpty(productParams.Search) || x.Name.ToLower().Contains(productParams.Search)) &&
+				(!productParams.BrandId.HasValue || x.ProductBrandId == productParams.BrandId) && 
+				(!productParams.TypeId.HasValue || x.ProductTypeId == productParams.TypeId))
+		{
+			base.AddInclude(x => x.ProductBrand);
+			base.AddInclude(x => x.ProductType);
+			base.ApplyPaging(productParams.PageSize * (productParams.PageIndex - 1), productParams.PageSize);
+
+			if (!string.IsNullOrEmpty(productParams.Sort))
+			{
+				switch (productParams.Sort)
+				{
+					case "priceAsc":
+						base.AddOrderBy(x => x.Price);
+						break;
+					case "priceDesc":
+						base.AddOrderByDesc(x => x.Price);
+						break;
+					default:
+						base.AddOrderBy(x => x.Name);
+						break;
+				}
+			}
 		}
 	}
 }
